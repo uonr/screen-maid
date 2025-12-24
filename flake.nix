@@ -25,9 +25,38 @@
             exec ${pythonWithDeps}/bin/python ${./screen-maid.py}
           '';
         };
+
+        toggle-mirror = pkgs.stdenv.mkDerivation {
+          name = "toggle-mirror";
+          src = ./.;
+          nativeBuildInputs = [ pkgs.swift ];
+          buildPhase = ''
+            swiftc toggle-mirror.swift -o toggle-mirror
+          '';
+          installPhase = ''
+            mkdir -p $out/bin
+            cp toggle-mirror $out/bin/
+          '';
+        };
+
+        screen-maid-swift = pkgs.stdenv.mkDerivation {
+          name = "screen-maid-swift";
+          src = ./.;
+          nativeBuildInputs = [ pkgs.swift ];
+          buildPhase = ''
+            swiftc screen-maid.swift -o screen-maid-swift
+          '';
+          installPhase = ''
+            mkdir -p $out/bin
+            cp screen-maid-swift $out/bin/
+          '';
+        };
       in
       {
-        packages.default = screen-maid;
+        packages = {
+          default = screen-maid;
+          inherit screen-maid toggle-mirror screen-maid-swift;
+        };
 
         apps.default = {
           type = "app";
@@ -37,6 +66,7 @@
         devShells.default = pkgs.mkShell {
           buildInputs = [
             pythonWithDeps
+            pkgs.swift
           ];
         };
       }
